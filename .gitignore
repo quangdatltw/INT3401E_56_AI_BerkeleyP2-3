@@ -1,0 +1,5 @@
+/.venv
+/multiagent/__pycache__
+/reinforcement/__pycache__
+*.pyc
+/.idea
