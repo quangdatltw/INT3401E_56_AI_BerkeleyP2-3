@@ -41,7 +41,6 @@ class ReflexAgent(Agent):
         """
         # Collect legal moves and successor states
         legalMoves = gameState.getLegalActions()
-
         # Choose one of the best actions
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
@@ -70,17 +69,35 @@ class ReflexAgent(Agent):
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
-        newFood = successorGameState.getFood()
+        newFood = successorGameState.getFood().asList()
         newGhostStates = successorGameState.getGhostStates()
-        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        "*** YOUR CODE HERE ***"
-        score = 0
-        for ghost in newGhostStates:
-            if newPos == ghost.getPosition():
-                print("Ghost is at newPos")
-                return -9999
-        return successorGameState.getScore()
+        # Tinh khoang cach Manhattan den thuc an gan nhat
+        foodDistances = [manhattanDistance(newPos, food) for food in newFood]
+        if foodDistances:
+            minFoodDistance = min(foodDistances)
+        else:
+            minFoodDistance = 0
+
+        # Tinh khoang cach Manhattan den ma gan nhat
+        ghostDistances = [manhattanDistance(newPos, ghost.getPosition()) for ghost in newGhostStates]
+        minGhostDistance = min(ghostDistances)
+
+        # Neu gap ma, tra ve diem am
+        if minGhostDistance <= 1:
+            return -9999
+
+        # Neu dung lai, tra ve diem am (Tranh bi dung yen cho)
+        if action == Directions.STOP:
+            return -9999
+
+        # Neu di nguoc huong, tra ve diem am (Tranh di lap trai-phai, len-xuong)
+        reverse = Directions.REVERSE[currentGameState.getPacmanState().configuration.direction]
+        if action == reverse:
+            return -5000
+
+        # Tra ve diem moi + 1/(khoang cach den thuc an gan nhat + 1) ( + 1 de tranh chia cho 0)
+        return successorGameState.getScore() + 1.0 / (minFoodDistance + 1)
 
 def scoreEvaluationFunction(currentGameState: GameState):
     """
