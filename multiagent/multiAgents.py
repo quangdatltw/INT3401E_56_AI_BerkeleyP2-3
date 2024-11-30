@@ -185,7 +185,63 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
+
+        # De quy cho Pacman
+        def maxLevel(gameState, depth):
+            currDepth = depth + 1
+            # Dung neu state la win/lose hoac da dat den do sau lon nhat.
+            if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
+                return self.evaluationFunction(gameState)
+            maxvalue = -999999
+            actions = gameState.getLegalActions(0)
+
+            # Duyet qua cac hanh dong de lay gia tri tot nhat.
+            for action in actions:
+                successor = gameState.generateSuccessor(0, action)
+                maxvalue = max(maxvalue, expectLevel(successor, currDepth, 1))
+            return maxvalue
+
+        # De quy cho Ghost.
+        def expectLevel(gameState, depth, agentIndex):
+            # Dung neu state la win/lose.
+            if gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(gameState)
+            actions = gameState.getLegalActions(agentIndex)
+            totalexpectedvalue = 0
+            numberofactions = len(actions)
+            for action in actions:
+                successor = gameState.generateSuccessor(agentIndex, action)
+
+                # Neu la ghost cuoi goi den ham maxLevel de xu li cho Pacman.
+                if agentIndex == (gameState.getNumAgents() - 1):
+                    expectedvalue = maxLevel(successor, depth)
+                # Tiep tuc xu li Ghost.
+                else:
+                    expectedvalue = expectLevel(successor, depth, agentIndex + 1)
+                totalexpectedvalue = totalexpectedvalue + expectedvalue
+            if numberofactions == 0:
+                return 0
+
+            # Chia gia tri ki vong trung binh.
+            return float(totalexpectedvalue) / float(numberofactions)
+
+        # Init o root.
+        actions = gameState.getLegalActions(0)
+        currentScore = -999999
+        returnAction = ''
+        for action in actions:
+            nextState = gameState.generateSuccessor(0, action)
+
+            # Sau root la tang expect nen goi ham expectLevel
+            score = expectLevel(nextState, 0, 1)
+
+            # Cap nhat score va action.
+            if score > currentScore:
+                returnAction = action
+                currentScore = score
+        return returnAction
+
 
 def betterEvaluationFunction(currentGameState: GameState):
     """
@@ -195,7 +251,49 @@ def betterEvaluationFunction(currentGameState: GameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # util.raiseNotDefined()
+
+    newPos = currentGameState.getPacmanPosition() # Vi tri hien tai
+    newFood = currentGameState.getFood() # Cac food hien tai
+    newGhostStates = currentGameState.getGhostStates() # Trang thai hien tai cua Ghost
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates] # Scared time cua ghost
+
+    # Tinh khoang cach tu vi tri hien tai den cac food
+    foodList = newFood.asList()
+    from util import manhattanDistance
+    foodDistance = [0]
+    for pos in foodList:
+        foodDistance.append(manhattanDistance(newPos, pos))
+
+    # Tinh khoang cach tu vi tri hien tai den cac Ghost
+    ghostPos = []
+    for ghost in newGhostStates:
+        ghostPos.append(ghost.getPosition())
+    ghostDistance = [0]
+    for pos in ghostPos:
+        ghostDistance.append(manhattanDistance(newPos, pos))
+
+    # So luong capsule
+    numberofPowerPellets = len(currentGameState.getCapsules())
+
+    score = 0
+    numberOfNoFoods = len(newFood.asList(False))
+    sumScaredTimes = sum(newScaredTimes)
+    sumGhostDistance = sum(ghostDistance)
+    reciprocalfoodDistance = 0 # Nghich dao tong khoang cach den food
+    if sum(foodDistance) > 0:
+        reciprocalfoodDistance = 1.0 / sum(foodDistance)
+
+    # Cong diem: cang gan food cang duoc nhieu diem, cang an duoc nhieu cang duoc nhieu diem
+    score += currentGameState.getScore() + reciprocalfoodDistance + numberOfNoFoods
+
+    if sumScaredTimes > 0: # Khi Ghost bi scared
+        # Cong them diem neu Ghost dang so, tru diem neu con capsule, tru diem neu qua xa Ghost
+        score += sumScaredTimes + (-1 * numberofPowerPellets) + (-1 * sumGhostDistance)
+    else: # Ghost binh thuong
+        # Cong diem neu dung xa Ghost, cong diem neu con capsule
+        score += sumGhostDistance + numberofPowerPellets
+    return score
 
 # Abbreviation
 better = betterEvaluationFunction
