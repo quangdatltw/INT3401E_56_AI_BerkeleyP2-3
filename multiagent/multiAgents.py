@@ -155,10 +155,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         numberOfGhosts = gameState.getNumAgents() - 1
 
-        #Used only for pacman agent hence agentindex is always 0.
+        #Ham su ly lop max 
         def maxLevel(gameState,depth):
             currDepth = depth + 1
-            if gameState.isWin() or gameState.isLose() or currDepth==self.depth:   #Terminal Test 
+            if gameState.isWin() or gameState.isLose() or currDepth==self.depth:   
                 return self.evaluationFunction(gameState)
             maxvalue = -999999
             actions = gameState.getLegalActions(0)
@@ -167,10 +167,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 maxvalue = max (maxvalue,minLevel(successor,currDepth,1))
             return maxvalue
         
-        #For all ghosts.
+        #Ham su ly lop min
         def minLevel(gameState,depth, agentIndex):
             minvalue = 999999
-            if gameState.isWin() or gameState.isLose():   #Terminal Test 
+            if gameState.isWin() or gameState.isLose():  
                 return self.evaluationFunction(gameState)
             actions = gameState.getLegalActions(agentIndex)
             for action in actions:
@@ -181,15 +181,15 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     minvalue = min(minvalue,minLevel(successor,depth,agentIndex+1))
             return minvalue
         
-        #Root level action.
+        #su ly cua root
         actions = gameState.getLegalActions(0)
         currentScore = -999999
         returnAction = ''
         for action in actions:
             nextState = gameState.generateSuccessor(0,action)
-            # Next level is a min level. Hence calling min for successors of the root.
+            # su ly lop ke tiep root
             score = minLevel(nextState,0,1)
-            # Choosing the action which is Maximum of the successors.
+            # chọn số điểm cao nhất từ các nước đi.
             if score > currentScore:
                 returnAction = action
                 currentScore = score
@@ -206,10 +206,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         
-        #Used only for pacman agent hence agentindex is always 0.
+        #ham su ly cho pacman
         def maxLevel(gameState,depth,alpha, beta):
             currDepth = depth + 1
-            if gameState.isWin() or gameState.isLose() or currDepth==self.depth:   #Terminal Test 
+            if gameState.isWin() or gameState.isLose() or currDepth==self.depth:   
                 return self.evaluationFunction(gameState)
             maxvalue = -999999
             actions = gameState.getLegalActions(0)
@@ -222,10 +222,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 alpha1 = max(alpha1,maxvalue)
             return maxvalue
         
-        #Cho ma
+        #ham su ly cho ghost
         def minLevel(gameState,depth,agentIndex,alpha,beta):
             minvalue = 999999
-            if gameState.isWin() or gameState.isLose():   #Terminal Test 
+            if gameState.isWin() or gameState.isLose():   
                 return self.evaluationFunction(gameState)
             actions = gameState.getLegalActions(agentIndex)
             beta1 = beta
@@ -251,13 +251,12 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         beta = 999999
         for action in actions:
             nextState = gameState.generateSuccessor(0,action)
-            # Next level is a min level. Hence calling min for successors of the root.
+            # su le lop ke root
             score = minLevel(nextState,0,1,alpha,beta)
-            # Choosing the action which is Maximum of the successors.
+            # chon hanh dong co so diem cao nhat
             if score > currentScore:
                 returnAction = action
                 currentScore = score
-            # Updating alpha value at root
             alpha = max(alpha,score)
         return returnAction
 
