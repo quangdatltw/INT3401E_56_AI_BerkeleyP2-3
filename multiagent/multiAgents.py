@@ -12,12 +12,14 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
-from util import manhattanDistance
-from game import Directions
-import random, util
+import random
+import util
 
 from game import Agent
+from game import Directions
 from pacman import GameState
+from util import manhattanDistance
+
 
 class ReflexAgent(Agent):
     """
@@ -28,7 +30,6 @@ class ReflexAgent(Agent):
     it in any way you see fit, so long as you don't touch our method
     headers.
     """
-
 
     def getAction(self, gameState: GameState):
         """
@@ -45,7 +46,7 @@ class ReflexAgent(Agent):
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        chosenIndex = random.choice(bestIndices)  # Pick randomly among the best
 
         "Add more of your code here if you want to"
 
@@ -99,6 +100,7 @@ class ReflexAgent(Agent):
         # Tra ve diem moi + 1/(khoang cach den thuc an gan nhat + 1) ( + 1 de tranh chia cho 0)
         return successorGameState.getScore() + 1.0 / (minFoodDistance + 1)
 
+
 def scoreEvaluationFunction(currentGameState: GameState):
     """
     This default evaluation function just returns the score of the state.
@@ -108,6 +110,7 @@ def scoreEvaluationFunction(currentGameState: GameState):
     (not reflex agents).
     """
     return currentGameState.getScore()
+
 
 class MultiAgentSearchAgent(Agent):
     """
@@ -124,10 +127,11 @@ class MultiAgentSearchAgent(Agent):
     is another abstract class.
     """
 
-    def __init__(self, evalFn = 'scoreEvaluationFunction', depth = '2'):
-        self.index = 0 # Pacman is always agent index 0
+    def __init__(self, evalFn='scoreEvaluationFunction', depth='2'):
+        self.index = 0  # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
+
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -156,44 +160,45 @@ class MinimaxAgent(MultiAgentSearchAgent):
         numberOfGhosts = gameState.getNumAgents() - 1
 
         #Ham su ly lop max 
-        def maxLevel(gameState,depth):
+        def maxLevel(gameState, depth):
             currDepth = depth + 1
-            if gameState.isWin() or gameState.isLose() or currDepth==self.depth:   
+            if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
                 return self.evaluationFunction(gameState)
             maxvalue = -999999
             actions = gameState.getLegalActions(0)
             for action in actions:
-                successor= gameState.generateSuccessor(0,action)
-                maxvalue = max (maxvalue,minLevel(successor,currDepth,1))
+                successor = gameState.generateSuccessor(0, action)
+                maxvalue = max(maxvalue, minLevel(successor, currDepth, 1))
             return maxvalue
-        
+
         #Ham su ly lop min
-        def minLevel(gameState,depth, agentIndex):
+        def minLevel(gameState, depth, agentIndex):
             minvalue = 999999
-            if gameState.isWin() or gameState.isLose():  
+            if gameState.isWin() or gameState.isLose():
                 return self.evaluationFunction(gameState)
             actions = gameState.getLegalActions(agentIndex)
             for action in actions:
-                successor= gameState.generateSuccessor(agentIndex,action)
+                successor = gameState.generateSuccessor(agentIndex, action)
                 if agentIndex == (gameState.getNumAgents() - 1):
-                    minvalue = min (minvalue,maxLevel(successor,depth))
+                    minvalue = min(minvalue, maxLevel(successor, depth))
                 else:
-                    minvalue = min(minvalue,minLevel(successor,depth,agentIndex+1))
+                    minvalue = min(minvalue, minLevel(successor, depth, agentIndex + 1))
             return minvalue
-        
+
         #su ly cua root
         actions = gameState.getLegalActions(0)
         currentScore = -999999
         returnAction = ''
         for action in actions:
-            nextState = gameState.generateSuccessor(0,action)
+            nextState = gameState.generateSuccessor(0, action)
             # su ly lop ke tiep root
-            score = minLevel(nextState,0,1)
+            score = minLevel(nextState, 0, 1)
             # chọn số điểm cao nhất từ các nước đi.
             if score > currentScore:
                 returnAction = action
                 currentScore = score
         return returnAction
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -205,42 +210,42 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        
+
         #ham su ly cho pacman
-        def maxLevel(gameState,depth,alpha, beta):
+        def maxLevel(gameState, depth, alpha, beta):
             currDepth = depth + 1
-            if gameState.isWin() or gameState.isLose() or currDepth==self.depth:   
+            if gameState.isWin() or gameState.isLose() or currDepth == self.depth:
                 return self.evaluationFunction(gameState)
             maxvalue = -999999
             actions = gameState.getLegalActions(0)
             alpha1 = alpha
             for action in actions:
-                successor= gameState.generateSuccessor(0,action)
-                maxvalue = max (maxvalue,minLevel(successor,currDepth,1,alpha1,beta))
+                successor = gameState.generateSuccessor(0, action)
+                maxvalue = max(maxvalue, minLevel(successor, currDepth, 1, alpha1, beta))
                 if maxvalue > beta:
                     return maxvalue
-                alpha1 = max(alpha1,maxvalue)
+                alpha1 = max(alpha1, maxvalue)
             return maxvalue
-        
+
         #ham su ly cho ghost
-        def minLevel(gameState,depth,agentIndex,alpha,beta):
+        def minLevel(gameState, depth, agentIndex, alpha, beta):
             minvalue = 999999
-            if gameState.isWin() or gameState.isLose():   
+            if gameState.isWin() or gameState.isLose():
                 return self.evaluationFunction(gameState)
             actions = gameState.getLegalActions(agentIndex)
             beta1 = beta
             for action in actions:
-                successor= gameState.generateSuccessor(agentIndex,action)
-                if agentIndex == (gameState.getNumAgents()-1):
-                    minvalue = min (minvalue,maxLevel(successor,depth,alpha,beta1))
+                successor = gameState.generateSuccessor(agentIndex, action)
+                if agentIndex == (gameState.getNumAgents() - 1):
+                    minvalue = min(minvalue, maxLevel(successor, depth, alpha, beta1))
                     if minvalue < alpha:
                         return minvalue
-                    beta1 = min(beta1,minvalue)
+                    beta1 = min(beta1, minvalue)
                 else:
-                    minvalue = min(minvalue,minLevel(successor,depth,agentIndex+1,alpha,beta1))
+                    minvalue = min(minvalue, minLevel(successor, depth, agentIndex + 1, alpha, beta1))
                     if minvalue < alpha:
                         return minvalue
-                    beta1 = min(beta1,minvalue)
+                    beta1 = min(beta1, minvalue)
             return minvalue
 
         # Alpha-Beta Pruning
@@ -250,15 +255,16 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         alpha = -999999
         beta = 999999
         for action in actions:
-            nextState = gameState.generateSuccessor(0,action)
+            nextState = gameState.generateSuccessor(0, action)
             # su le lop ke root
-            score = minLevel(nextState,0,1,alpha,beta)
+            score = minLevel(nextState, 0, 1, alpha, beta)
             # chon hanh dong co so diem cao nhat
             if score > currentScore:
                 returnAction = action
                 currentScore = score
-            alpha = max(alpha,score)
+            alpha = max(alpha, score)
         return returnAction
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -273,6 +279,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
+
         # util.raiseNotDefined()
 
         # De quy cho Pacman
@@ -341,10 +348,10 @@ def betterEvaluationFunction(currentGameState: GameState):
     "*** YOUR CODE HERE ***"
     # util.raiseNotDefined()
 
-    newPos = currentGameState.getPacmanPosition() # Vi tri hien tai
-    newFood = currentGameState.getFood() # Cac food hien tai
-    newGhostStates = currentGameState.getGhostStates() # Trang thai hien tai cua Ghost
-    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates] # Scared time cua ghost
+    newPos = currentGameState.getPacmanPosition()  # Vi tri hien tai
+    newFood = currentGameState.getFood()  # Cac food hien tai
+    newGhostStates = currentGameState.getGhostStates()  # Trang thai hien tai cua Ghost
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]  # Scared time cua ghost
 
     # Tinh khoang cach tu vi tri hien tai den cac food
     foodList = newFood.asList()
@@ -368,20 +375,21 @@ def betterEvaluationFunction(currentGameState: GameState):
     numberOfNoFoods = len(newFood.asList(False))
     sumScaredTimes = sum(newScaredTimes)
     sumGhostDistance = sum(ghostDistance)
-    reciprocalfoodDistance = 0 # Nghich dao tong khoang cach den food
+    reciprocalfoodDistance = 0  # Nghich dao tong khoang cach den food
     if sum(foodDistance) > 0:
         reciprocalfoodDistance = 1.0 / sum(foodDistance)
 
     # Cong diem: cang gan food cang duoc nhieu diem, cang an duoc nhieu cang duoc nhieu diem
     score += currentGameState.getScore() + reciprocalfoodDistance + numberOfNoFoods
 
-    if sumScaredTimes > 0: # Khi Ghost bi scared
+    if sumScaredTimes > 0:  # Khi Ghost bi scared
         # Cong them diem neu Ghost dang so, tru diem neu con capsule, tru diem neu qua xa Ghost
         score += sumScaredTimes + (-1 * numberofPowerPellets) + (-1 * sumGhostDistance)
-    else: # Ghost binh thuong
+    else:  # Ghost binh thuong
         # Cong diem neu dung xa Ghost, cong diem neu con capsule
         score += sumGhostDistance + numberofPowerPellets
     return score
+
 
 # Abbreviation
 better = betterEvaluationFunction

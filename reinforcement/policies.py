@@ -2,7 +2,16 @@ import itertools
 from gridworld import Gridworld
 from valueIterationAgents import ValueIterationAgent
 
+"""
+File nay chay doc lap
+Muc dich la thu tat ca cac bo tham so co the cua ValueIterationAgent de tim ra bo tham so thoa man yeu cau
+Thay doi yeu cau bang cach thay doi bien requirement
 
+"""
+requirement = "Prefer the close exit (+1), risking the cliff (-10)"
+# requirement = "Prefer the close exit (+1), but avoiding the cliff (-10)"
+# requirement = "Prefer the distant exit (+10), risking the cliff (-10)"
+# requirement = "Prefer the distant exit (+10), avoiding the cliff (-10)"
 def evaluate_parameters(discount_values, noise_values, living_reward_values, environment, grid, requirement):
     for discount, noise, living_reward in itertools.product(discount_values, noise_values, living_reward_values):
         # Initialize the environment with the required grid argument
@@ -20,10 +29,8 @@ def evaluate_parameters(discount_values, noise_values, living_reward_values, env
                 pass_count += 1
 
         if pass_count == 10:
-            print('(' + str(discount) + ', ' + str(noise) + ', ' + str(living_reward) + ')')
-            '''print(discount, noise, living_reward)
-            print("pass")
-            print("----------------------")'''
+            print(discount, noise, living_reward)
+            print("----------------------")
 
 
 def evaluate_agent_performance(agent, environment, requirement):
@@ -71,8 +78,5 @@ grid = [
     ['S', '_', '_', '_', '_'],
     [-10, -10, -10, -10, -10]
 ]
-requirement = "Prefer the close exit (+1), risking the cliff (-10)"
-# requirement = "Prefer the close exit (+1), but avoiding the cliff (-10)"
-# requirement = "Prefer the distant exit (+10), risking the cliff (-10)"
-# requirement = "Prefer the distant exit (+10), avoiding the cliff (-10)"
+
 evaluate_parameters(discount_values, noise_values, living_reward_values, environment, grid, requirement)
